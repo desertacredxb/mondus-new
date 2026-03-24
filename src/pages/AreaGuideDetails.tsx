@@ -4,11 +4,12 @@ import { useParams } from "react-router-dom";
 import areaGuideData from "../data/areaGuideData.json";
 
 const AreaGuideDetails = () => {
-  const { title } = useParams(); // e.g. 'dubai-marina'
+  const { title } = useParams();
 
   const area = areaGuideData.find(
     (a) =>
-      a.title.replace(/\s+/g, "-").toLowerCase() === (title || "").toLowerCase()
+      a.title.replace(/\s+/g, "-").toLowerCase() ===
+      (title || "").toLowerCase(),
   );
 
   if (!area) {
@@ -79,7 +80,7 @@ const AreaGuideDetails = () => {
                 <iframe
                   title="Google Map"
                   src={`https://www.google.com/maps?q=${encodeURIComponent(
-                    area.title
+                    area.title,
                   )}&output=embed`}
                   className="w-full h-full border-0"
                   allowFullScreen
