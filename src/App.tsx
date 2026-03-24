@@ -50,7 +50,6 @@ import { Toaster } from "react-hot-toast";
 import PropertyManagement from "./pages/admin/PropertyManagement";
 import DeveloperManagement from "./pages/admin/DeveloperManagement";
 
-// Custom wrapper to access location inside App
 function AppWrapper() {
   const location = useLocation();
 
