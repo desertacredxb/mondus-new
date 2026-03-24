@@ -1,12 +1,4 @@
 import React from "react";
-import {
-  FaBuilding,
-  FaGlobe,
-  FaUsers,
-  FaHandshake,
-  FaChartLine,
-  FaHome,
-} from "react-icons/fa";
 
 import golden_visa from "../assets/golden-visa-image.jpeg";
 
