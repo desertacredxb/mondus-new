@@ -56,7 +56,7 @@ const sanitizeContent = (html: string): string => {
 };
 
 // ── Accordion FAQ item ──────────────────────────────────────────────────────
-const FaqItem = ({ faq, index }: { faq: FAQ; index: number }) => {
+const FaqItem = ({ faq }: { faq: FAQ; index: number }) => {
   const [open, setOpen] = useState(false);
 
   return (

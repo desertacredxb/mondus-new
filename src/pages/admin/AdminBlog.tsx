@@ -1,9 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import AddBlog from "../../components/AddBlogs";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import "../../index.css";
 import { useNavigate } from "react-router-dom";
 
 interface BlogPost {
@@ -18,16 +15,6 @@ interface BlogPost {
   tags?: string;
 }
 
-const toolbarOptions = [
-  ["bold", "italic", "underline", "strike"],
-  [{ color: [] }, { background: [] }],
-  ["blockquote"],
-  [{ list: "ordered" }, { list: "bullet" }],
-  [{ header: [1, 2, 3, 4, 5, 6, false] }],
-  [{ align: [] }],
-  ["link"],
-];
-
 const API_BASE = import.meta.env.VITE_API_BASE_URL + "/api/blogs";
 
 const AdminBlog = () => {
@@ -36,10 +23,6 @@ const AdminBlog = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
-  const [showContentEditor, setShowContentEditor] = useState(false);
-  const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
-  const [editorContent, setEditorContent] = useState("");
-  const [saving, setSaving] = useState(false);
 
   const fetchBlogs = async () => {
     setLoading(true);
@@ -47,10 +30,13 @@ const AdminBlog = () => {
       const res = await fetch(`${API_BASE}/viewblog`);
       const json = await res.json();
 
-      const blogsArray = Array.isArray(json) ? json : json.data || [];
-      const sortedBlogs = blogsArray.sort((a: any, b: any) => {
-        const dateA = new Date(a.updatedAt || a.datePublished).getTime();
-        const dateB = new Date(b.updatedAt || b.datePublished).getTime();
+      const blogsArray: BlogPost[] = Array.isArray(json)
+        ? json
+        : (json.data ?? json.blogs ?? []);
+
+      const sortedBlogs = blogsArray.sort((a, b) => {
+        const dateA = new Date(a.datePublished).getTime();
+        const dateB = new Date(b.datePublished).getTime();
         return dateB - dateA;
       });
 
@@ -67,8 +53,6 @@ const AdminBlog = () => {
     fetchBlogs();
   }, []);
 
-  console.log(blogs);
-
   const handleDelete = async (slug: string) => {
     if (!window.confirm("Are you sure you want to delete this blog post?"))
       return;
@@ -82,7 +66,7 @@ const AdminBlog = () => {
       } else {
         alert(json.msg || "Failed to delete");
       }
-    } catch (error) {
+    } catch {
       alert("Error deleting blog post");
     }
   };
@@ -195,74 +179,6 @@ const AdminBlog = () => {
           onSuccess={fetchBlogs}
           existingBlog={editingBlog}
         />
-      )}
-
-      {showContentEditor && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-auto">
-          <div className="relative bg-white text-black w-full max-w-3xl mx-4 my-12 p-6 rounded shadow">
-            <h3 className="text-lg font-semibold mb-4">Edit Blog Content</h3>
-
-            <ReactQuill
-              value={editorContent}
-              onChange={setEditorContent}
-              theme="snow"
-              className="mb-4 h-64 overflow-y-auto"
-              modules={{ toolbar: toolbarOptions }}
-            />
-
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={() => setShowContentEditor(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={saving}
-                onClick={async () => {
-                  if (!selectedBlog) return;
-
-                  setSaving(true);
-                  try {
-                    const res = await fetch(
-                      `https://mondus-backend.onrender.com/api/blogs/${selectedBlog.slug}`,
-                      {
-                        method: "PUT",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                          content: editorContent,
-                        }),
-                      },
-                    );
-
-                    if (!res.ok)
-                      throw new Error("Failed to update blog content");
-
-                    alert("Blog content updated successfully!");
-                    setShowContentEditor(false);
-                    fetchBlogs();
-                  } catch (error) {
-                    console.error(error);
-                    alert(
-                      "An error occurred while updating the blog. Please try again.",
-                    );
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                className={`px-4 py-1 text-sm rounded text-white ${
-                  saving
-                    ? "bg-[var(--primary-color)] cursor-not-allowed"
-                    : "bg-[var(--primary-color)] hover:opacity-80"
-                }`}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
