@@ -4,6 +4,7 @@ import AddBlog from "../../components/AddBlogs";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "../../index.css";
+import { useNavigate } from "react-router-dom";
 
 interface BlogPost {
   _id: string;
@@ -30,6 +31,7 @@ const toolbarOptions = [
 const API_BASE = import.meta.env.VITE_API_BASE_URL + "/api/blogs";
 
 const AdminBlog = () => {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -45,9 +47,14 @@ const AdminBlog = () => {
       const res = await fetch(`${API_BASE}/viewblog`);
       const json = await res.json();
 
-      // ✅ normalize response
       const blogsArray = Array.isArray(json) ? json : json.data || [];
-      setBlogs(blogsArray);
+      const sortedBlogs = blogsArray.sort((a: any, b: any) => {
+        const dateA = new Date(a.updatedAt || a.datePublished).getTime();
+        const dateB = new Date(b.updatedAt || b.datePublished).getTime();
+        return dateB - dateA;
+      });
+
+      setBlogs(sortedBlogs);
     } catch (error) {
       console.error("Failed to fetch blogs", error);
       setBlogs([]);
@@ -59,6 +66,8 @@ const AdminBlog = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
+
+  console.log(blogs);
 
   const handleDelete = async (slug: string) => {
     if (!window.confirm("Are you sure you want to delete this blog post?"))
@@ -97,10 +106,7 @@ const AdminBlog = () => {
         <h1 className="text-2xl sm:text-3xl font-bold">Blog Posts</h1>
         <button
           className="text-white bg-[var(--primary-color)] px-4 py-2 rounded"
-          onClick={() => {
-            setEditingBlog(null); // ensure it's a new blog
-            setShowAddModal(true);
-          }}
+          onClick={() => navigate("/admin/add")}
         >
           Add New Blog
         </button>
@@ -117,13 +123,13 @@ const AdminBlog = () => {
               <thead className="bg-[#1e1e1e] text-left">
                 <tr>
                   <th className="px-2 py-2 border-b border-gray-700 w-36 truncate">
-                    Title
+                    Image
                   </th>
                   <th className="px-2 py-2 border-b border-gray-700 w-40 truncate">
-                    Excerpt
+                    Title
                   </th>
                   <th className="px-2 py-2 border-b border-gray-700 w-48 truncate">
-                    Content
+                    Description
                   </th>
                   <th className="px-2 py-2 border-b border-gray-700 w-24 truncate">
                     Author
@@ -143,34 +149,25 @@ const AdminBlog = () => {
                     className="even:bg-[#111] hover:bg-[#222] transition duration-200"
                   >
                     <td className="px-2 py-2 truncate whitespace-nowrap">
+                      <img
+                        src={blog.coverImage}
+                        alt="blog cover image"
+                        width={100}
+                      />
+                    </td>
+                    <td className="px-2 py-2 truncate whitespace-nowrap">
                       {blog.title}
                     </td>
                     <td className="px-2 py-2 truncate whitespace-nowrap">
                       {blog.excerpt}
                     </td>
-                    <td className="px-2 py-2 text-white truncate whitespace-nowrap cursor-pointer">
-                      <div
-                        onClick={() => {
-                          setSelectedBlog(blog);
-                          setEditorContent(blog.content);
-                          setShowContentEditor(true);
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html:
-                            blog.content.length > 150
-                              ? blog.content.slice(0, 140) + "..."
-                              : blog.content,
-                        }}
-                      />
-                    </td>
-
                     <td className="px-2 py-2 truncate whitespace-nowrap">
                       {blog.author}
                     </td>
                     <td className="px-2 py-2 truncate whitespace-nowrap">
                       {new Date(blog.datePublished).toLocaleDateString()}
                     </td>
-                    <td className="px-2 py-2 space-x-2">
+                    <td className="px-2 py-2 space-x-4">
                       <button
                         onClick={() => handleEdit(blog.slug)}
                         className="text-blue-600 hover:text-blue-700"
@@ -196,7 +193,7 @@ const AdminBlog = () => {
         <AddBlog
           onClose={handleModalClose}
           onSuccess={fetchBlogs}
-          existingBlog={editingBlog} // Pass blog if editing
+          existingBlog={editingBlog}
         />
       )}
 

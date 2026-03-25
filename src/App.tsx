@@ -49,6 +49,7 @@ import AdminProtectedRoute from "./pages/admin/Adminprotectedroute";
 import { Toaster } from "react-hot-toast";
 import PropertyManagement from "./pages/admin/PropertyManagement";
 import DeveloperManagement from "./pages/admin/DeveloperManagement";
+import AddBlogPage from "./components/AddBlogPage";
 
 function AppWrapper() {
   const location = useLocation();
@@ -105,6 +106,7 @@ function AppWrapper() {
             <Route path="sendnewsletter" element={<NewsletterForm />} />
             <Route path="sendemailer" element={<Emailer />} />
             <Route path="blogs" element={<AdminBlog />} />
+            <Route path="add" element={<AddBlogPage />} />
             <Route path="listing" element={<AdminListings />} />
             <Route path="opportunity" element={<Opportunity />} />
           </Route>

@@ -34,7 +34,19 @@ const Blog = () => {
         setLoading(true);
         const res = await fetch(`${API_BASE}/api/blogs/viewblog`);
         const data = await res.json();
-        setBlogs(data);
+
+        // getBlog controller returns { count, data: [...] }
+        const blogsArray: BlogPost[] = Array.isArray(data)
+          ? data
+          : (data.data ?? data.blogs ?? []);
+
+        const sortedBlogs = blogsArray.sort((a, b) => {
+          const dateA = new Date(a.lastUpdated || a.datePublished).getTime();
+          const dateB = new Date(b.lastUpdated || b.datePublished).getTime();
+          return dateB - dateA;
+        });
+
+        setBlogs(sortedBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -95,7 +107,7 @@ const Blog = () => {
         ) : (
           <>
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {currentBlogs?.map((post) => (
+              {currentBlogs.map((post) => (
                 <div
                   key={post._id}
                   className="cursor-pointer relative rounded-lg p-[1.5px] hover:shadow-[0_0_10px_var(--primary-color)] transition"
@@ -109,7 +121,7 @@ const Blog = () => {
                     <img
                       src={post.coverImage}
                       alt={`Cover image for ${post.title}`}
-                      className="w-full h-[300px] object-fill rounded-t-lg"
+                      className="w-full h-[300px] object-cover rounded-t-lg"
                     />
                     <div className="p-6 flex flex-col flex-grow justify-between">
                       <div>
@@ -147,7 +159,7 @@ const Blog = () => {
                     onClick={() => paginate(index + 1)}
                     className={`px-3 py-1 rounded ${
                       currentPage === index + 1
-                        ? "bg-blue-600 text-white"
+                        ? "bg-[var(--primary-color)] text-white"
                         : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                     }`}
                   >

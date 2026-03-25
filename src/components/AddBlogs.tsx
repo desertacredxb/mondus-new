@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
+import JoditEditor from "jodit-react";
 
-// const API_BASE = "https://mondus-backend.onrender.com/api/blogs";
 const API_BASE = import.meta.env.VITE_API_BASE_URL + "/api/blogs";
+
+interface FAQ {
+  question: string;
+  answer: string;
+}
 
 interface BlogPost {
   _id?: string;
@@ -12,6 +17,7 @@ interface BlogPost {
   author: string;
   tags?: string;
   coverImage?: string;
+  faqs?: FAQ[];
 }
 
 const AddBlog = ({
@@ -32,7 +38,16 @@ const AddBlog = ({
     tags: existingBlog?.tags || "",
     coverImage: null as File | null,
   });
+
+  const [faqs, setFaqs] = useState<FAQ[]>(
+    existingBlog?.faqs || [{ question: "", answer: "" }],
+  );
+
   const [submitting, setSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    existingBlog?.coverImage || null,
+  );
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (existingBlog) {
@@ -45,6 +60,13 @@ const AddBlog = ({
         tags: existingBlog?.tags || "",
         coverImage: null,
       });
+
+      setFaqs(
+        existingBlog.faqs?.length
+          ? existingBlog.faqs
+          : [{ question: "", answer: "" }],
+      );
+      setImagePreview(existingBlog.coverImage || null); // ✅ NEW
     }
   }, [existingBlog]);
 
@@ -53,33 +75,65 @@ const AddBlog = ({
   ) => {
     const { name, value } = e.target;
 
-    // Auto-generate slug if the title is changing and the slug hasn't been manually modified
     if (name === "title") {
       const autoSlug = value
         .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "") // remove special chars
+        .replace(/[^a-z0-9\s]/g, "")
         .trim()
-        .replace(/\s+/g, "-"); // replace spaces with -
+        .replace(/\s+/g, "-");
 
       setFormData((prev) => ({
         ...prev,
         title: value,
-        slug: existingBlog ? prev.slug : autoSlug, // don't overwrite if editing
+        slug: existingBlog ? prev.slug : autoSlug,
       }));
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFormData({ ...formData, coverImage: e.target.files[0] });
-    }
+  const handleImageChange = (file: File) => {
+    setFormData((prev) => ({ ...prev, coverImage: file }));
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageChange(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  // FAQ Handlers
+  const handleFaqChange = (index: number, field: string, value: string) => {
+    const updatedFaqs = [...faqs];
+    updatedFaqs[index][field as keyof FAQ] = value;
+    setFaqs(updatedFaqs);
+  };
+
+  const addFaq = () => {
+    setFaqs([...faqs, { question: "", answer: "" }]);
+  };
+
+  const removeFaq = (index: number) => {
+    const updatedFaqs = faqs.filter((_, i) => i !== index);
+    setFaqs(updatedFaqs);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
     const blogData = new FormData();
     blogData.append("title", formData.title);
     blogData.append("slug", formData.slug);
@@ -87,7 +141,13 @@ const AddBlog = ({
     blogData.append("content", formData.content);
     blogData.append("author", formData.author);
     blogData.append("tags", formData.tags);
-    if (formData.coverImage) blogData.append("coverImage", formData.coverImage);
+
+    // ✅ Send FAQs
+    blogData.append("faqs", JSON.stringify(faqs));
+
+    if (formData.coverImage) {
+      blogData.append("coverImage", formData.coverImage);
+    }
 
     try {
       const method = existingBlog ? "PUT" : "POST";
@@ -101,21 +161,16 @@ const AddBlog = ({
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        alert(
-          existingBlog
-            ? "Blog updated successfully"
-            : "Blog added successfully",
-        );
+        alert(existingBlog ? "Blog updated" : "Blog added");
         onSuccess();
         onClose();
       } else {
-        alert(
-          data.error || `Failed to ${existingBlog ? "update" : "add"} blog`,
-        );
+        alert(data.error || "Something went wrong");
       }
     } catch (err) {
-      alert(`Error ${existingBlog ? "updating" : "adding"} blog`);
+      alert("Error submitting blog");
     } finally {
       setSubmitting(false);
     }
@@ -123,94 +178,165 @@ const AddBlog = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-white text-black p-6 w-full max-w-2xl rounded-xl overflow-y-auto max-h-[90vh]">
+      <div className="bg-white text-black p-6 w-full max-w-3xl rounded-xl overflow-y-auto max-h-[90vh]">
         <h2 className="text-2xl font-bold mb-4">
-          {existingBlog ? "Edit Blog" : "Add New Blog"}
+          {existingBlog ? "Edit Blog" : "Add Blog"}
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            type="text"
             name="title"
-            placeholder="Title"
-            className="w-full p-2 border"
             value={formData.title}
             onChange={handleChange}
-            required
+            placeholder="Title"
+            className="w-full p-2 border"
           />
           <input
-            type="text"
             name="slug"
-            placeholder="Slug"
-            className="w-full p-2 border"
             value={formData.slug}
             onChange={handleChange}
-            required
+            placeholder="Slug"
+            className="w-full p-2 border"
           />
           <input
-            type="text"
             name="excerpt"
-            placeholder="Excerpt"
-            className="w-full p-2 border"
             value={formData.excerpt}
             onChange={handleChange}
-            required
-          />
-          <textarea
-            name="content"
-            placeholder="Content"
-            className="w-full p-2 border h-32"
-            value={formData.content}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="author"
-            placeholder="Author"
+            placeholder="Excerpt"
             className="w-full p-2 border"
+          />
+
+          {/* ✅ JODIT EDITOR */}
+          <div>
+            <label className="font-semibold">Content</label>
+            <JoditEditor
+              value={formData.content}
+              onChange={(newContent) =>
+                setFormData((prev) => ({ ...prev, content: newContent }))
+              }
+            />
+          </div>
+
+          <input
+            name="author"
             value={formData.author}
             onChange={handleChange}
-            required
+            placeholder="Author"
+            className="w-full p-2 border"
           />
           <input
-            type="text"
             name="tags"
-            placeholder="Tags (comma separated)"
-            className="w-full p-2 border"
             value={formData.tags}
             onChange={handleChange}
+            placeholder="Tags"
+            className="w-full p-2 border"
           />
-          <input
-            type="file"
-            accept="image/*"
-            className="w-full"
-            onChange={handleImageChange}
-            required={!existingBlog}
-          />
+
+          {/* ✅ FAQs Section */}
+          <div>
+            <h3 className="font-bold text-lg">FAQs</h3>
+
+            {faqs.map((faq, index) => (
+              <div key={index} className="border p-3 mb-2 rounded">
+                <input
+                  type="text"
+                  placeholder="Question"
+                  value={faq.question}
+                  onChange={(e) =>
+                    handleFaqChange(index, "question", e.target.value)
+                  }
+                  className="w-full p-2 border mb-2"
+                />
+                <textarea
+                  placeholder="Answer"
+                  value={faq.answer}
+                  onChange={(e) =>
+                    handleFaqChange(index, "answer", e.target.value)
+                  }
+                  className="w-full p-2 border"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeFaq(index)}
+                  className="text-red-500 mt-2"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addFaq}
+              className="bg-gray-200 px-3 py-1 rounded"
+            >
+              + Add FAQ
+            </button>
+          </div>
+
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition ${
+              isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+            }`}
+          >
+            {imagePreview ? (
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded"
+                />
+
+                <div className="flex justify-center gap-3 mt-3">
+                  <label className="cursor-pointer text-blue-600">
+                    Change
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleImageChange(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-gray-500">
+                  Drag & drop image here or click to upload
+                </p>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleImageChange(e.target.files[0]);
+                    }
+                  }}
+                />
+              </>
+            )}
+          </div>
+
           <div className="flex justify-end gap-4">
             <button
               type="button"
+              className="border px-2 py-1 border-green-700"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-400 rounded"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`px-4 py-2 text-white rounded ${
-                submitting
-                  ? "bg-[var(--primary-color)] cursor-not-allowed"
-                  : "bg-[var(--primary-color)] hover:opacity-90"
-              }`}
+              className="border px-2 py-1 border-orange-500"
               disabled={submitting}
             >
-              {submitting
-                ? existingBlog
-                  ? "Updating..."
-                  : "Adding..."
-                : existingBlog
-                  ? "Update"
-                  : "Submit"}
+              {submitting ? "Saving..." : "Submit"}
             </button>
           </div>
         </form>
