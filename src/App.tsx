@@ -50,6 +50,7 @@ import { Toaster } from "react-hot-toast";
 import PropertyManagement from "./pages/admin/PropertyManagement";
 import DeveloperManagement from "./pages/admin/DeveloperManagement";
 import AddBlogPage from "./components/AddBlogPage";
+import SEO from "./components/SEO";
 
 function AppWrapper() {
   const location = useLocation();
@@ -59,6 +60,7 @@ function AppWrapper() {
   return (
     <>
       <Toaster position="bottom-center" />
+      <SEO />
 
       <Routes>
         <Route path="/" element={<Landing />} />

@@ -1,1 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"><url><loc>https://www.mondusproperties.ae/</loc></url><url><loc>https://www.mondusproperties.ae/buy</loc></url><url><loc>https://www.mondusproperties.ae/rent</loc></url><url><loc>https://www.mondusproperties.ae/offplan</loc></url><url><loc>https://www.mondusproperties.ae/blogs</loc></url><url><loc>https://www.mondusproperties.ae/contact</loc></url><url><loc>https://www.mondusproperties.ae/about</loc></url></urlset>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url>
+<loc>https://www.mondusproperties.ae/</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/buy</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/rent</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/offplan</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/blogs</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/contact</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/about</loc>
+</url>
+<url>
+<loc>https://www.mondusproperties.ae/developers</loc>
+</url>
+
+ <!-- Dynamic Blog URLs -->
+  <!-- Example Output -->
+  <url>
+    <loc>https://www.mondusproperties.ae/blogs/real-estate-agent-in-dubai-why-choose-mondus-properties</loc>
+    <lastmod>2026-03-30T10:00:00.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
