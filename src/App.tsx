@@ -51,6 +51,7 @@ import PropertyManagement from "./pages/admin/PropertyManagement";
 import DeveloperManagement from "./pages/admin/DeveloperManagement";
 import AddBlogPage from "./components/AddBlogPage";
 import SEO from "./components/SEO";
+import NotFound from "./components/NotFound";
 
 function AppWrapper() {
   const location = useLocation();
@@ -82,8 +83,9 @@ function AppWrapper() {
         <Route path="/careers" element={<Career />} />
         <Route path="/area-guides" element={<AreaGuide />} />
         <Route path="/area-guides/:title" element={<AreaGuideDetails />} />
-
         <Route path="/awards" element={<AwardsPage />} />
+
+        <Route path="*" element={<NotFound />} />
 
         {/* Admin login page */}
         <Route path="/admin-login" element={<AdminLogin />} />
