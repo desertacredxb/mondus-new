@@ -32,7 +32,7 @@ interface TocItem {
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL + "/api/blogs";
-const SITE_URL = "https://www.mondusproperties.ae/";
+const SITE_URL = "https://www.mondusproperties.ae";
 
 const sanitizeContent = (html: string): string => {
   const parser = new DOMParser();
