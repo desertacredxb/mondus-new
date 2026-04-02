@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "https://mondus-bakend-wnvx.onrender.com"
+      "destination": "https://mondus-bakend-wnvx.onrender.com/sitemap.xml"
     }
   ]
 }
