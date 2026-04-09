@@ -250,7 +250,7 @@ const AddBlogPage = () => {
           <div className="flex justify-end gap-4">
             <button
               type="button"
-              onClick={() => navigate("/blogs")}
+              onClick={() => navigate("/admin/blogs")}
               className="px-5 py-2 bg-gray-300 rounded cursor-pointer"
             >
               Cancel
