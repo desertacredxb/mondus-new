@@ -365,7 +365,7 @@ const Rent: React.FC = () => {
       </Helmet>
 
       <div className="bg-white dark:bg-black text-black dark:text-white font-raleway font-light dark:font-thin">
-        <div className="mb-16 md:mb-28 pt-5">
+        <div className=" pt-5">
           <Suspense
             fallback={<div className="text-center py-4">Loading navbar...</div>}
           >
