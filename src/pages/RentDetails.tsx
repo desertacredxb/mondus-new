@@ -134,7 +134,7 @@ const RentDetails = () => {
             {images.map((img, i) => (
               <img
                 key={i}
-                src={`${API_BASE_URL}${img}`}
+                src={`${img}`}
                 className="w-full h-[80vh] object-cover"
                 alt={property.propertyName}
               />

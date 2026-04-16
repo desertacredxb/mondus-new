@@ -272,7 +272,7 @@ const Rent: React.FC = () => {
                       loading="lazy"
                       src={
                         property.propertyImages?.[0]
-                          ? `${API_BASE_URL}${property.propertyImages[0]}`
+                          ? `${property.propertyImages[0]}`
                           : "/placeholder.jpg"
                       }
                       className="w-full h-56 object-cover"

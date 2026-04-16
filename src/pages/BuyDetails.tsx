@@ -34,6 +34,7 @@ const BuyDetails = () => {
 
         if (json.success && json.data) {
           setProperty(json.data);
+          console.log("Fetched property:", json.data);
         } else {
           setProperty(null);
         }
@@ -111,7 +112,7 @@ const BuyDetails = () => {
             {images.map((img, i) => (
               <img
                 key={i}
-                src={`${API_BASE_URL}${img}`}
+                src={`${img}`}
                 className="w-full h-[80vh] object-cover"
                 alt={property.propertyName}
               />
