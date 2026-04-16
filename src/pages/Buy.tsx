@@ -809,12 +809,12 @@ const Buy: React.FC = () => {
 
             {/* WHY CHOOSE */}
             <div className="mb-20 text-center">
-              <h3 className="text-3xl font-semibold mb-6">
+              <h2 className="text-3xl font-semibold mb-6">
                 Why Choose{" "}
                 <span className="text-[var(--primary-color)]">
                   Mondus Properties
                 </span>
-              </h3>
+              </h2>
               <p className="text-gray-700 dark:text-gray-100 text-sm">
                 <a
                   className="text-[var(--primary-color)] font-medium"
@@ -873,9 +873,9 @@ const Buy: React.FC = () => {
                       onClick={() => toggleFAQ(index)}
                       className="w-full flex items-center justify-between p-5 text-left"
                     >
-                      <span className="font-medium text-gray-800 dark:text-gray-100">
+                      <h3 className="font-medium text-gray-800 dark:text-gray-100">
                         {faq.question}
-                      </span>
+                      </h3>
 
                       <ChevronDown
                         className={`transition-transform duration-300 ${

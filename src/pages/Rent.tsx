@@ -873,9 +873,9 @@ const Rent: React.FC = () => {
                       onClick={() => toggleFAQ(index)}
                       className="w-full flex items-center justify-between p-5 text-left"
                     >
-                      <span className="font-medium text-gray-800 dark:text-gray-100">
+                      <h3 className="font-medium text-gray-800 dark:text-gray-100">
                         {faq.question}
-                      </span>
+                      </h3>
 
                       <ChevronDown
                         className={`transition-transform duration-300 ${
