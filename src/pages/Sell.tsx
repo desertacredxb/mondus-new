@@ -2,23 +2,17 @@ import Navbar from "../components/Nav";
 import Footer from "../components/Footer";
 import PromptConsultation from "../components/PromptConsultation";
 import { Helmet } from "react-helmet-async";
-import React, { useState, Suspense, lazy } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   TrendingUp,
   BadgePercent,
-  ShieldCheck,
   Building2,
   Globe,
   CheckCircle2,
-  Shield,
   ChevronDown,
   FileText,
-  DollarSign,
-  Users,
-  Home,
-  Award,
 } from "lucide-react";
 
 import sellImage from "../assets/buy-hero-img.png";
@@ -61,13 +55,6 @@ const steps = [
   "Transfer happens at DLD",
 ];
 
-const fees = [
-  "Dubai Land Department takes a percentage of the sale price",
-  "Agency commissions go to the broker",
-  "NOC charges to the developer for approval",
-  "Mortgage clearance fees if there's an active loan",
-];
-
 const documents = [
   "Original title deed or ownership certificate",
   "Passport copy and Emirates ID",
@@ -75,14 +62,6 @@ const documents = [
   "Mortgage clearance certificate (if applicable)",
   "Sales agreement / Form F",
   "Utility bills or proof of payment for service charges",
-];
-
-const whyChoose = [
-  "Mondus Properties helps sell your property fast with real buyer access",
-  "Expert pricing so you earn more than others",
-  "Marketing hits every portal and social feed",
-  "From the first list to the final handover, we guide you",
-  "The whole process moves more quickly and closes smoothly",
 ];
 
 const propertyTypes = [
@@ -124,29 +103,6 @@ const whySell = [
   {
     icon: Building2,
     text: "Make profits from present high market prices.",
-  },
-];
-
-const marketingStrategy = [
-  {
-    icon: Award,
-    title: "Professional Photography",
-    desc: "Make your home the centre of attention with high-quality images.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Featured Listings",
-    desc: "Increase visibility on major platforms for maximum exposure.",
-  },
-  {
-    icon: Users,
-    title: "Targeted Advertisements",
-    desc: "Connect with the right audience, both locally and internationally.",
-  },
-  {
-    icon: Globe,
-    title: "International Exposure",
-    desc: "Reach investors from all over the world for maximum opportunities.",
   },
 ];
 

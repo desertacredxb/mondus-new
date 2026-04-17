@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { FAQAccordion } from "./Sell";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -22,9 +21,7 @@ import {
   Globe,
   MapPin,
   User,
-  Crown,
   CheckCircle2,
-  Shield,
   Bath,
   ChevronDown,
   Users,
@@ -100,22 +97,6 @@ const documents = [
   "Residents Emirates ID",
   "Legal residency: valid copy of visa",
   "Security deposit cheque as per agreement",
-];
-
-const costs = [
-  "Annual rent",
-  "Security deposit",
-  "Agency fee",
-  "Ejari registration fee",
-];
-
-const whyRent = [
-  "Spacious apartments which are convenient for both short and long-term accommodation",
-  "No commitment of property ownership or mobility",
-  "Premium gated communities and developments",
-  "State-of-the-art facilities such as gyms, pools, and shopping facilities",
-  "Secure, hygienic, and extremely contemporary infrastructure",
-  "Good linkages to business and recreational centers",
 ];
 
 const propertyTypes = [
@@ -200,8 +181,6 @@ const tips = [
 ];
 
 const Rent: React.FC = () => {
-  const navigate = useNavigate();
-
   const [rentData, setRentData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
