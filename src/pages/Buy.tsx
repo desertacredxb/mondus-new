@@ -214,13 +214,26 @@ const Buy: React.FC = () => {
           `${API_BASE_URL}/api/property?listingType=buy&status=true`,
         );
         const json = await res.json();
-
         // Safety filter (in case backend changes)
-        const buyProperties = (json.data || []).filter(
-          (p: any) => p.listingType === "buy",
-        );
+        const raw = (json.data || []).filter((p: any) => p.listingType === "buy");
 
-        setSaleData(buyProperties);
+        const buyProperties = raw.map((p: any) => ({
+          ...p,
+          bedroom:
+            p.bedroom === undefined || p.bedroom === null
+              ? p.bedroom
+              : p.bedroom,
+          bathroom:
+            p.bathroom === undefined || p.bathroom === null
+              ? p.bathroom
+              : p.bathroom,
+          sizeSqft:
+            p.sizeSqft === undefined || p.sizeSqft === null
+              ? p.sizeSqft
+              : p.sizeSqft,
+        }));
+
+        setSaleData(raw);
       } catch (error) {
         console.error("Error fetching properties:", error);
       } finally {
@@ -247,29 +260,70 @@ const Buy: React.FC = () => {
 
   /* ---------------- Filter Logic ---------------- */
   const properties = useMemo(() => {
+    // Helper: extract numeric parts from strings (handles commas)
+    const extractNumbers = (s: any) => {
+      if (!s) return [];
+      const matches = String(s).match(/[\d,]+/g);
+      if (!matches) return [];
+      return matches.map((m) => Number(String(m).replace(/,/g, "")));
+    };
+
     return saleData.filter((property) => {
-      const bedroomMatch =
-        !bedroomFilter ||
-        (bedroomFilter === "4"
-          ? property.bedroom >= 4
-          : property.bedroom === Number(bedroomFilter));
+      const bedStr = String(property.bedroom || "").toLowerCase();
+      const bathStr = String(property.bathroom || "").toLowerCase();
 
-      const bathroomMatch =
-        !bathroomFilter ||
-        (bathroomFilter === "4"
-          ? property.bathroom >= 4
-          : property.bathroom === Number(bathroomFilter));
+      // Bedrooms
+      let bedroomMatch = true;
+      if (bedroomFilter) {
+        if (bedroomFilter === "4") {
+          const nums = extractNumbers(bedStr);
+          bedroomMatch = nums.length ? nums[0] >= 4 : bedStr.includes("4") || bedStr.includes("4+");
+        } else {
+          bedroomMatch = bedStr.includes(String(bedroomFilter).toLowerCase());
+        }
+      }
 
-      const subareaMatch = !subareaFilter || property.subArea === subareaFilter;
+      // Bathrooms
+      let bathroomMatch = true;
+      if (bathroomFilter) {
+        if (bathroomFilter === "4") {
+          const nums = extractNumbers(bathStr);
+          bathroomMatch = nums.length ? nums[0] >= 4 : bathStr.includes("4") || bathStr.includes("4+");
+        } else {
+          bathroomMatch = bathStr.includes(String(bathroomFilter).toLowerCase());
+        }
+      }
+
+      // Subarea & property type: substring, case-insensitive
+      const subareaMatch = !subareaFilter || String(property.subArea || "").toLowerCase().includes(subareaFilter.toLowerCase());
 
       const propertyTypeMatch =
-        !propertyTypeFilter || property.propertyType === propertyTypeFilter;
+        !propertyTypeFilter || String(property.propertyType || "").toLowerCase().includes(propertyTypeFilter.toLowerCase());
 
-      const minAreaMatch =
-        !minAreaFilter || property.sizeSqft >= Number(minAreaFilter);
+      // Area (sizeSqft) - parse numeric ranges and compare bounds
+      const sizeNums = extractNumbers(property.sizeSqft);
+      let minAreaMatch = true;
+      let maxAreaMatch = true;
 
-      const maxAreaMatch =
-        !maxAreaFilter || property.sizeSqft <= Number(maxAreaFilter);
+      if (minAreaFilter) {
+        const minVal = Number(minAreaFilter);
+        if (sizeNums.length) {
+          // compare against lower bound
+          minAreaMatch = sizeNums[0] >= minVal;
+        } else {
+          minAreaMatch = false;
+        }
+      }
+
+      if (maxAreaFilter) {
+        const maxVal = Number(maxAreaFilter);
+        if (sizeNums.length) {
+          // compare against upper bound (last number)
+          maxAreaMatch = sizeNums[sizeNums.length - 1] <= maxVal;
+        } else {
+          maxAreaMatch = false;
+        }
+      }
 
       return (
         bedroomMatch &&
@@ -513,10 +567,10 @@ const Buy: React.FC = () => {
                           <Bath className="w-4 h-4" />
                           {property.bathroom}
                         </span>
-                        <span className="flex gap-1">
+                        {(property.sizeSqft !== "NaN" && property.sizeSqft !== "0") && (<span className="flex gap-1">
                           <Ruler className="w-4 h-4" />
-                          {property.sizeSqft} sqft
-                        </span>
+                          {property.sizeSqft}
+                        </span>)}
                       </div>
                     </div>
                   </div>

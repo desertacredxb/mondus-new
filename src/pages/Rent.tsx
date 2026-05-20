@@ -200,7 +200,10 @@ const Rent: React.FC = () => {
           `${API_BASE_URL}/api/property?listingType=rent&status=true`,
         );
         const json = await res.json();
-        setRentData(json.data || []);
+        // Keep original string values (do not coerce to Number) so filters can
+        // search inside those strings without mutating the property data.
+        const raw = json.data || [];
+        setRentData(raw);
       } catch (error) {
         console.error("Error fetching rent properties:", error);
       } finally {
@@ -227,31 +230,74 @@ const Rent: React.FC = () => {
     [rentData],
   );
 
+  const showSpec = (v: any) => {
+    if (v === undefined || v === null) return false;
+    if (typeof v === "number") return Number.isFinite(v) && v !== 0;
+    if (typeof v === "string") {
+      const s = v.trim().toLowerCase();
+      return s !== "" && s !== "0" && s !== "nan";
+    }
+    return true;
+  };
+
   /* ---------------- FILTER LOGIC ---------------- */
   const properties = useMemo(() => {
+    const extractNumbers = (s: any) => {
+      if (!s) return [];
+      const matches = String(s).match(/[\d,]+/g);
+      if (!matches) return [];
+      return matches.map((m) => Number(String(m).replace(/,/g, "")));
+    };
+
     return rentData.filter((property) => {
-      const bedroomMatch =
-        !bedroomFilter ||
-        (bedroomFilter === "4"
-          ? property.bedroom >= 4
-          : property.bedroom === Number(bedroomFilter));
+      const bedStr = String(property.bedroom || "").toLowerCase();
+      const bathStr = String(property.bathroom || "").toLowerCase();
 
-      const bathroomMatch =
-        !bathroomFilter ||
-        (bathroomFilter === "4"
-          ? property.bathroom >= 4
-          : property.bathroom === Number(bathroomFilter));
+      let bedroomMatch = true;
+      if (bedroomFilter) {
+        if (bedroomFilter === "4") {
+          const nums = extractNumbers(bedStr);
+          bedroomMatch = nums.length ? nums[0] >= 4 : bedStr.includes("4") || bedStr.includes("4+");
+        } else {
+          bedroomMatch = bedStr.includes(String(bedroomFilter).toLowerCase());
+        }
+      }
 
-      const subareaMatch = !subareaFilter || property.subArea === subareaFilter;
+      let bathroomMatch = true;
+      if (bathroomFilter) {
+        if (bathroomFilter === "4") {
+          const nums = extractNumbers(bathStr);
+          bathroomMatch = nums.length ? nums[0] >= 4 : bathStr.includes("4") || bathStr.includes("4+");
+        } else {
+          bathroomMatch = bathStr.includes(String(bathroomFilter).toLowerCase());
+        }
+      }
 
-      const propertyTypeMatch =
-        !propertyTypeFilter || property.propertyType === propertyTypeFilter;
+      const subareaMatch = !subareaFilter || String(property.subArea || "").toLowerCase().includes(subareaFilter.toLowerCase());
 
-      const minAreaMatch =
-        !minAreaFilter || property.sizeSqft >= Number(minAreaFilter);
+      const propertyTypeMatch = !propertyTypeFilter || String(property.propertyType || "").toLowerCase().includes(propertyTypeFilter.toLowerCase());
 
-      const maxAreaMatch =
-        !maxAreaFilter || property.sizeSqft <= Number(maxAreaFilter);
+      const sizeNums = extractNumbers(property.sizeSqft);
+      let minAreaMatch = true;
+      let maxAreaMatch = true;
+
+      if (minAreaFilter) {
+        const minVal = Number(minAreaFilter);
+        if (sizeNums.length) {
+          minAreaMatch = sizeNums[0] >= minVal;
+        } else {
+          minAreaMatch = false;
+        }
+      }
+
+      if (maxAreaFilter) {
+        const maxVal = Number(maxAreaFilter);
+        if (sizeNums.length) {
+          maxAreaMatch = sizeNums[sizeNums.length - 1] <= maxVal;
+        } else {
+          maxAreaMatch = false;
+        }
+      }
 
       return (
         bedroomMatch &&
@@ -473,7 +519,7 @@ const Rent: React.FC = () => {
                   className="h-full"
                 >
                   <div className="bg-gray-100 dark:bg-neutral-900 shadow rounded overflow-hidden border flex flex-col h-full">
-                    <img
+          <img
                       loading="lazy"
                       src={
                         property.propertyImages?.[0]
@@ -493,15 +539,21 @@ const Rent: React.FC = () => {
                       <p className="text-sm">{property.propertyType}</p>
 
                       <div className="flex items-center text-sm gap-4 py-1">
-                        <span className="flex gap-1">
-                          <BedDouble className="w-4 h-4" /> {property.bedroom}
-                        </span>
-                        <span className="flex gap-1">
-                          <Bath className="w-4 h-4" /> {property.bathroom}
-                        </span>
-                        <span className="flex gap-1">
-                          <Ruler className="w-4 h-4" /> {property.sizeSqft} sqft
-                        </span>
+                        {property.bedroom && (
+                          <span className="flex gap-1">
+                            <BedDouble className="w-4 h-4" /> {property.bedroom}
+                          </span>
+                        )}
+                        {property.bathroom && (
+                          <span className="flex gap-1">
+                            <Bath className="w-4 h-4" /> {property.bathroom}
+                          </span>
+                        )}
+                        {property.sizeSqft && (
+                          <span className="flex gap-1">
+                            <Ruler className="w-4 h-4" /> {property.sizeSqft} sqft
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -19,9 +19,9 @@ export interface Property {
 
   price: number;
 
-  bedroom: number;
-  bathroom: number;
-  sizeSqft: number;
+  bedroom: string;
+  bathroom: string;
+  sizeSqft: string;
 
   address: string;
   subArea: string;
@@ -35,6 +35,7 @@ export interface Property {
   featuresAmenities: string[];
   nearby: string[];
   extraHighlights: string[];
+  extraInfo: string[];
 
   videoLink?: string | null;
   googleMapUrl?: string | null;
@@ -71,6 +72,7 @@ export interface PropertyForm {
   featuresAmenities: string;
   nearby: string;
   extraHighlights: string;
+  extraInfo: string;
 
   videoLink: string;
   googleMapUrl: string;
@@ -135,6 +137,7 @@ const PropertyManagement = () => {
     featuresAmenities: "",
     nearby: "",
     extraHighlights: "",
+    extraInfo: "",
 
     videoLink: "",
     googleMapUrl: "",
@@ -267,9 +270,9 @@ const PropertyManagement = () => {
 
       /* NUMBERS */
       formData.append("price", String(Number(form.price)));
-      formData.append("bedroom", String(Number(form.bedroom)));
-      formData.append("bathroom", String(Number(form.bathroom)));
-      formData.append("sizeSqft", String(Number(form.sizeSqft)));
+      formData.append("bedroom", form.bedroom && form.bedroom.trim());
+      formData.append("bathroom", form.bathroom && form.bathroom.trim());
+      formData.append("sizeSqft", form.sizeSqft && form.sizeSqft.trim());
 
       /* OPTIONAL TEXT FIELDS */
       if (form.highlights) formData.append("highlights", form.highlights);
@@ -281,6 +284,8 @@ const PropertyManagement = () => {
 
       if (form.extraHighlights)
         formData.append("extraHighlights", form.extraHighlights);
+
+      if (form.extraInfo) formData.append("extraInfo", form.extraInfo);
 
       if (form.videoLink) formData.append("videoLink", form.videoLink);
 
@@ -378,6 +383,7 @@ const PropertyManagement = () => {
       featuresAmenities: p.featuresAmenities?.join(", ") || "",
       nearby: p.nearby?.join(", ") || "",
       extraHighlights: p.extraHighlights?.join(", ") || "",
+      extraInfo: p.extraInfo?.join(", ") || "",
 
       videoLink: p.videoLink || "",
       googleMapUrl: p.googleMapUrl || "",
@@ -424,6 +430,7 @@ const PropertyManagement = () => {
       featuresAmenities: "",
       nearby: "",
       extraHighlights: "",
+      extraInfo: "",
 
       videoLink: "",
       googleMapUrl: "",
@@ -650,7 +657,7 @@ const PropertyManagement = () => {
                 </select>
 
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Bedrooms"
                   className="bg-gray-800 border border-gray-700 rounded px-3 py-2"
                   value={form.bedroom}
@@ -660,7 +667,7 @@ const PropertyManagement = () => {
                 />
 
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Bathrooms"
                   className="bg-gray-800 border border-gray-700 rounded px-3 py-2"
                   value={form.bathroom}
@@ -670,7 +677,7 @@ const PropertyManagement = () => {
                 />
 
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Price"
                   className="bg-gray-800 border border-gray-700 rounded px-3 py-2"
                   value={form.price}
@@ -752,6 +759,15 @@ const PropertyManagement = () => {
                   value={form.extraHighlights}
                   onChange={(e) =>
                     setForm({ ...form, extraHighlights: e.target.value })
+                  }
+                />
+
+                <textarea
+                  placeholder="Extra Info (comma separated, use \, for literal commas)"
+                  className="bg-gray-800 border border-gray-700 rounded px-3 py-2"
+                  value={form.extraInfo}
+                  onChange={(e) =>
+                    setForm({ ...form, extraInfo: e.target.value })
                   }
                 />
               </div>
@@ -1071,7 +1087,7 @@ const PropertyManagement = () => {
                 </div>
               </div>
 
-              {/* Arrays (highlights, amenities, nearby, extraHighlights) */}
+              {/* Arrays (highlights, amenities, nearby, extraHighlights, extraInfo) */}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TagList title="Highlights" items={viewProperty.highlights} />
                 <TagList
@@ -1083,6 +1099,7 @@ const PropertyManagement = () => {
                   title="Extra Highlights"
                   items={viewProperty.extraHighlights}
                 />
+                <TagList title="Extra Info" items={viewProperty.extraInfo} />
               </div>
 
               {/* Links */}

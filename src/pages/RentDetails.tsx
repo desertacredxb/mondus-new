@@ -35,7 +35,24 @@ const RentDetails = () => {
         const json = await res.json();
 
         if (json.success && json.data) {
-          setProperty(json.data);
+          const p = json.data;
+          const normalized = {
+            ...p,
+            bedroom:
+              p.bedroom === undefined || p.bedroom === null
+                ? p.bedroom
+                : Number(p.bedroom),
+            bathroom:
+              p.bathroom === undefined || p.bathroom === null
+                ? p.bathroom
+                : Number(p.bathroom),
+            sizeSqft:
+              p.sizeSqft === undefined || p.sizeSqft === null
+                ? p.sizeSqft
+                : Number(p.sizeSqft),
+          };
+
+          setProperty(normalized);
         } else {
           setProperty(null);
         }
@@ -72,6 +89,16 @@ const RentDetails = () => {
 
   /* ================= SAFE DATA ================= */
   const images: string[] = property.propertyImages || [];
+
+  const showSpec = (v: any) => {
+    if (v === undefined || v === null) return false;
+    if (typeof v === "number") return Number.isFinite(v) && v !== 0;
+    if (typeof v === "string") {
+      const s = v.trim().toLowerCase();
+      return s !== "" && s !== "0" && s !== "nan";
+    }
+    return true;
+  };
 
   // const [lng, lat] = property.geopoints?.split(",").map(Number) || [];
 
@@ -161,15 +188,21 @@ const RentDetails = () => {
 
         {/* Specs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="flex gap-2">
-            <BedDouble /> {property.bedroom} Beds
-          </div>
-          <div className="flex gap-2">
-            <Bath /> {property.bathroom} Baths
-          </div>
-          <div className="flex gap-2">
-            <Ruler /> {property.sizeSqft} sqft
-          </div>
+          {showSpec(property.bedroom) && (
+            <div className="flex gap-2">
+              <BedDouble /> {property.bedroom} Beds
+            </div>
+          )}
+          {showSpec(property.bathroom) && (
+            <div className="flex gap-2">
+              <Bath /> {property.bathroom} Baths
+            </div>
+          )}
+          {showSpec(property.sizeSqft) && (
+            <div className="flex gap-2">
+              <Ruler /> {property.sizeSqft} sqft
+            </div>
+          )}
           <div className="flex gap-2">
             <Building /> {property.propertyType}
           </div>
@@ -216,6 +249,47 @@ const RentDetails = () => {
                 <span key={i} className="border px-3 py-2 rounded text-sm">
                   {a}
                 </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Nearby */}
+        {property.nearby?.length > 0 && (
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Nearby</h2>
+            <ul className="grid md:grid-cols-3 gap-2">
+              {property.nearby.map((n: string, i: number) => (
+                <li key={i}>• {n}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Extra Highlights */}
+        {property.extraHighlights?.length > 0 && (
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Extra Highlights</h2>
+            <ul className="grid md:grid-cols-3 gap-2">
+              {property.extraHighlights.map((eh: string, i: number) => (
+                <li key={i}>• {eh}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Extra Info */}
+        {property.extraInfo?.length > 0 && (
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Extra Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {property.extraInfo.map((ei: string, i: number) => (
+                <div
+                  key={i}
+                  className="border px-3 py-2 rounded text-sm bg-gray-50 dark:bg-gray-900"
+                >
+                  {ei}
+                </div>
               ))}
             </div>
           </div>
