@@ -9,4 +9,18 @@ Disallow: /admin-login
 # Optional: block API if any
 Disallow: /api/
 
+# 404 pages
+
+Disallow: /news/trusted-dubai-real-estate-agency-for-investments
+Disallow: /tag/first-time-buyers
+Disallow: /properties/tower-a
+Disallow: /currency/switch/AED
+Disallow: /properties/south-bay
+Disallow: /password/request
+Disallow: /news/studio-flat-in-dubai
+Disallow: /properties?type=rent&page=1
+Disallow: /properties?type=offplan
+Disallow: /properties?type=rent&page=2
+Disallow: /tag/luxury-living-in-villanova-dubai
+
 Sitemap: https://mondusproperties.ae/sitemap.xml
