@@ -383,7 +383,7 @@ const PropertyManagement = () => {
       featuresAmenities: p.featuresAmenities?.join(", ") || "",
       nearby: p.nearby?.join(", ") || "",
       extraHighlights: p.extraHighlights?.join(", ") || "",
-      extraInfo: p.extraInfo?.join(", ") || "",
+      extraInfo: p.extraInfo?.join("\n") || "",
 
       videoLink: p.videoLink || "",
       googleMapUrl: p.googleMapUrl || "",
@@ -526,9 +526,8 @@ const PropertyManagement = () => {
                   <td className="p-3 text-center">{p.bedroom}</td>
                   <td className="p-3 text-center">
                     <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        p.status ? "bg-green-600" : "bg-red-600"
-                      }`}
+                      className={`px-2 py-1 text-xs rounded ${p.status ? "bg-green-600" : "bg-red-600"
+                        }`}
                     >
                       {p.status ? "Active" : "Inactive"}
                     </span>
@@ -573,9 +572,8 @@ const PropertyManagement = () => {
           <button
             key={i}
             onClick={() => setPage(i + 1)}
-            className={`px-3 py-1 rounded ${
-              page === i + 1 ? "bg-indigo-600" : "bg-gray-700"
-            }`}
+            className={`px-3 py-1 rounded ${page === i + 1 ? "bg-indigo-600" : "bg-gray-700"
+              }`}
           >
             {i + 1}
           </button>
@@ -763,7 +761,7 @@ const PropertyManagement = () => {
                 />
 
                 <textarea
-                  placeholder="Extra Info (comma separated, use \, for literal commas)"
+                  placeholder="Extra Info (one item per line)"
                   className="bg-gray-800 border border-gray-700 rounded px-3 py-2"
                   value={form.extraInfo}
                   onChange={(e) =>
@@ -950,11 +948,10 @@ const PropertyManagement = () => {
 
               <button
                 onClick={handleConfirm}
-                className={`px-4 py-2 rounded ${
-                  confirmAction === "delete"
+                className={`px-4 py-2 rounded ${confirmAction === "delete"
                     ? "bg-red-600 hover:bg-red-700"
                     : "bg-yellow-600 hover:bg-yellow-700"
-                }`}
+                  }`}
               >
                 Confirm
               </button>
@@ -996,9 +993,8 @@ const PropertyManagement = () => {
               {/* Status & Quick stats */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <span
-                  className={`px-2 py-1 text-xs rounded ${
-                    viewProperty.status ? "bg-green-600" : "bg-red-600"
-                  }`}
+                  className={`px-2 py-1 text-xs rounded ${viewProperty.status ? "bg-green-600" : "bg-red-600"
+                    }`}
                 >
                   {viewProperty.status ? "Active" : "Inactive"}
                 </span>
