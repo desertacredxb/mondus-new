@@ -17,7 +17,7 @@ export interface Property {
   listingType: ListingType; // "buy" | "rent"
   propertyType: string;
 
-  price: number;
+  price: string;
 
   bedroom: string;
   bathroom: string;
@@ -269,7 +269,7 @@ const PropertyManagement = () => {
       formData.append("propertyDetails", form.propertyDetails);
 
       /* NUMBERS */
-      formData.append("price", String(Number(form.price)));
+      formData.append("price", form.price && form.price.trim());
       formData.append("bedroom", form.bedroom && form.bedroom.trim());
       formData.append("bathroom", form.bathroom && form.bathroom.trim());
       formData.append("sizeSqft", form.sizeSqft && form.sizeSqft.trim());
@@ -1012,7 +1012,13 @@ const PropertyManagement = () => {
                 </span>
 
                 <span className="text-xs text-gray-300">
-                  ₹ {Number(viewProperty.price || 0).toLocaleString("en-IN")}
+                  {viewProperty.price && viewProperty.price !== "NaN" && viewProperty.price !== "0" ? (
+                    String(viewProperty.price).toLowerCase().includes("aed") || String(viewProperty.price).toLowerCase().includes("price")
+                      ? viewProperty.price
+                      : `AED ${viewProperty.price}`
+                  ) : (
+                    "Price on Application"
+                  )}
                 </span>
               </div>
 

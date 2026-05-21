@@ -203,7 +203,13 @@ const Rent: React.FC = () => {
         // Keep original string values (do not coerce to Number) so filters can
         // search inside those strings without mutating the property data.
         const raw = json.data || [];
-        setRentData(raw);
+        const rentProperties = raw.map((p: any) => ({
+          ...p,
+          bedroom: p.bedroom === undefined || p.bedroom === null ? "" : String(p.bedroom),
+          bathroom: p.bathroom === undefined || p.bathroom === null ? "" : String(p.bathroom),
+          sizeSqft: p.sizeSqft === undefined || p.sizeSqft === null ? "" : String(p.sizeSqft),
+        }));
+        setRentData(rentProperties);
       } catch (error) {
         console.error("Error fetching rent properties:", error);
       } finally {
@@ -229,16 +235,6 @@ const Rent: React.FC = () => {
       ).sort(),
     [rentData],
   );
-
-  const showSpec = (v: any) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "number") return Number.isFinite(v) && v !== 0;
-    if (typeof v === "string") {
-      const s = v.trim().toLowerCase();
-      return s !== "" && s !== "0" && s !== "nan";
-    }
-    return true;
-  };
 
   /* ---------------- FILTER LOGIC ---------------- */
   const properties = useMemo(() => {
@@ -539,19 +535,19 @@ const Rent: React.FC = () => {
                       <p className="text-sm">{property.propertyType}</p>
 
                       <div className="flex items-center text-sm gap-4 py-1">
-                        {property.bedroom && (
+                        {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
                           <span className="flex gap-1">
                             <BedDouble className="w-4 h-4" /> {property.bedroom}
                           </span>
                         )}
-                        {property.bathroom && (
+                        {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
                           <span className="flex gap-1">
                             <Bath className="w-4 h-4" /> {property.bathroom}
                           </span>
                         )}
-                        {property.sizeSqft && (
+                        {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
                           <span className="flex gap-1">
-                            <Ruler className="w-4 h-4" /> {property.sizeSqft} sqft
+                            <Ruler className="w-4 h-4" /> {property.sizeSqft}
                           </span>
                         )}
                       </div>

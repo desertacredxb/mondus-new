@@ -38,18 +38,9 @@ const RentDetails = () => {
           const p = json.data;
           const normalized = {
             ...p,
-            bedroom:
-              p.bedroom === undefined || p.bedroom === null
-                ? p.bedroom
-                : Number(p.bedroom),
-            bathroom:
-              p.bathroom === undefined || p.bathroom === null
-                ? p.bathroom
-                : Number(p.bathroom),
-            sizeSqft:
-              p.sizeSqft === undefined || p.sizeSqft === null
-                ? p.sizeSqft
-                : Number(p.sizeSqft),
+            bedroom: p.bedroom === undefined || p.bedroom === null ? "" : String(p.bedroom),
+            bathroom: p.bathroom === undefined || p.bathroom === null ? "" : String(p.bathroom),
+            sizeSqft: p.sizeSqft === undefined || p.sizeSqft === null ? "" : String(p.sizeSqft),
           };
 
           setProperty(normalized);
@@ -89,16 +80,6 @@ const RentDetails = () => {
 
   /* ================= SAFE DATA ================= */
   const images: string[] = property.propertyImages || [];
-
-  const showSpec = (v: any) => {
-    if (v === undefined || v === null) return false;
-    if (typeof v === "number") return Number.isFinite(v) && v !== 0;
-    if (typeof v === "string") {
-      const s = v.trim().toLowerCase();
-      return s !== "" && s !== "0" && s !== "nan";
-    }
-    return true;
-  };
 
   // const [lng, lat] = property.geopoints?.split(",").map(Number) || [];
 
@@ -182,23 +163,29 @@ const RentDetails = () => {
           </div>
 
           <div className="text-2xl font-bold text-[var(--primary-color)]">
-            AED {property.price?.toLocaleString()}
+            {property.price && property.price !== "NaN" && property.price !== "0" && property.price !== "null" ? (
+              String(property.price).toLowerCase().includes("aed") || String(property.price).toLowerCase().includes("price")
+                ? property.price
+                : `AED ${property.price}`
+            ) : (
+              "Price on Application"
+            )}
           </div>
         </div>
 
         {/* Specs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {showSpec(property.bedroom) && (
+          {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
             <div className="flex gap-2">
               <BedDouble /> {property.bedroom} Beds
             </div>
           )}
-          {showSpec(property.bathroom) && (
+          {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
             <div className="flex gap-2">
               <Bath /> {property.bathroom} Baths
             </div>
           )}
-          {showSpec(property.sizeSqft) && (
+          {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
             <div className="flex gap-2">
               <Ruler /> {property.sizeSqft} sqft
             </div>

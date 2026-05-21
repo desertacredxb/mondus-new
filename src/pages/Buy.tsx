@@ -214,26 +214,18 @@ const Buy: React.FC = () => {
           `${API_BASE_URL}/api/property?listingType=buy&status=true`,
         );
         const json = await res.json();
+        console.log(json)
         // Safety filter (in case backend changes)
         const raw = (json.data || []).filter((p: any) => p.listingType === "buy");
 
         const buyProperties = raw.map((p: any) => ({
           ...p,
-          bedroom:
-            p.bedroom === undefined || p.bedroom === null
-              ? p.bedroom
-              : p.bedroom,
-          bathroom:
-            p.bathroom === undefined || p.bathroom === null
-              ? p.bathroom
-              : p.bathroom,
-          sizeSqft:
-            p.sizeSqft === undefined || p.sizeSqft === null
-              ? p.sizeSqft
-              : p.sizeSqft,
+          bedroom: p.bedroom === undefined || p.bedroom === null ? "" : String(p.bedroom),
+          bathroom: p.bathroom === undefined || p.bathroom === null ? "" : String(p.bathroom),
+          sizeSqft: p.sizeSqft === undefined || p.sizeSqft === null ? "" : String(p.sizeSqft),
         }));
 
-        setSaleData(raw);
+        setSaleData(buyProperties);
       } catch (error) {
         console.error("Error fetching properties:", error);
       } finally {
@@ -559,18 +551,24 @@ const Buy: React.FC = () => {
                       </p>
 
                       <div className="flex gap-4 text-sm py-1">
-                        <span className="flex gap-1">
-                          <BedDouble className="w-4 h-4" />
-                          {property.bedroom}
-                        </span>
-                        <span className="flex gap-1">
-                          <Bath className="w-4 h-4" />
-                          {property.bathroom}
-                        </span>
-                        {(property.sizeSqft !== "NaN" && property.sizeSqft !== "0") && (<span className="flex gap-1">
-                          <Ruler className="w-4 h-4" />
-                          {property.sizeSqft}
-                        </span>)}
+                        {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
+                          <span className="flex gap-1">
+                            <BedDouble className="w-4 h-4" />
+                            {property.bedroom}
+                          </span>
+                        )}
+                        {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
+                          <span className="flex gap-1">
+                            <Bath className="w-4 h-4" />
+                            {property.bathroom}
+                          </span>
+                        )}
+                        {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
+                          <span className="flex gap-1">
+                            <Ruler className="w-4 h-4" />
+                            {property.sizeSqft}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -932,20 +930,18 @@ const Buy: React.FC = () => {
                       </h3>
 
                       <ChevronDown
-                        className={`transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-[var(--primary-color)]" : ""
-                        }`}
+                        className={`transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--primary-color)]" : ""
+                          }`}
                         size={20}
                       />
                     </button>
 
                     {/* Answer */}
                     <div
-                      className={`px-5 transition-all duration-300 ${
-                        isOpen
+                      className={`px-5 transition-all duration-300 ${isOpen
                           ? "max-h-40 pb-5 opacity-100"
                           : "max-h-0 opacity-0"
-                      } overflow-hidden`}
+                        } overflow-hidden`}
                     >
                       <p className="text-sm text-gray-600 dark:text-gray-100 leading-relaxed">
                         {faq.answer}
