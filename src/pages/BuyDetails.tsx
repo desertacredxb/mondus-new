@@ -371,7 +371,7 @@ const BuyDetails = () => {
             </div>
           )}
 
-          {(property.faqs && property.faqs.length>0) && (<div className="max-w-3xl mx-auto">
+          {(property?.faqs && property.faqs?.length>0) && (<div className="max-w-3xl mx-auto">
             <FAQAccordion
               items={property.faqs}
               allowMultiple={false}
