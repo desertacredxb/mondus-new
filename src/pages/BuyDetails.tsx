@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import {
   MapPin,
   BedDouble,
@@ -15,6 +15,8 @@ import NotifyMe from "../components/NotifyMe";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Helmet } from "react-helmet";
+import { FAQAccordion } from "../components/FAQAccordion";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -22,9 +24,8 @@ const BuyDetails = () => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+  const contentRef = useRef<HTMLDivElement>(null);
   // console.log(idOrSlug);
-
   /* ================= FETCH PROPERTY ================= */
   useEffect(() => {
     const fetchProperty = async () => {
@@ -109,149 +110,241 @@ const BuyDetails = () => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
   };
 
+
+  const title = property.metaTitle || `${property.propertyName} for ${property.listingType === 'buy' ? 'Sale' : 'Rent'} | Real Estate`;
+  const description = property.metaDescription || property.propertyDetails?.substring(0, 160);
+  const currentUrl = window.location.href;
+  const primaryImage = property.propertyImages?.[0] || "https://yourdomain.com/default-property.jpg";
+
+  // 4. Generate Real Estate Listing Schema
+  const realEstateSchema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": property.propertyName,
+    "description": property.metaDescription,
+    "url": currentUrl,
+    "image": property.propertyImages || [primaryImage],
+    "datePosted": property.createdAt,
+    "about": {
+      "@type": "SingleFamilyResidence",
+      "name": property.propertyName,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": property.address,
+        "addressLocality": property.subArea || ""
+      },
+      "numberOfRooms": property.bedroom || undefined,
+      "numberOfBathroomsTotal": property.bathroom || undefined,
+      "floorSize": property.sizeSqft ? {
+        "@type": "QuantitativeValue",
+        "value": property.sizeSqft,
+        "unitCode": "FTK"
+      } : undefined,
+      "offers": {
+        "@type": "Offer",
+        "price": property.price?.replace(/[^0-9.]/g, ''),
+        "priceCurrency": "AED", // Change to match your currency target (USD, INR, AED, etc)
+        "businessFunction": property.listingType === 'buy' ? "http://purl.org/goodrelations/v1#Sell" : "http://purl.org/goodrelations/v1#LeaseOut"
+      }
+    }
+  };
+
+  // 5. Generate FAQ Schema Markup conditionally if values exist
+  let faqSchema = null;
+  if (property.faqs && property.faqs.length > 0) {
+    faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": property.faqs.map((faq: any) => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    };
+  }
+
   return (
-    <div className="bg-white dark:bg-black text-black dark:text-white">
-      <Navbar />
+    <>
+      <Helmet>
+        {/* Standard Metadata */}
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        {property.metaKeywords && <meta name="keywords" content={property.metaKeywords} />}
+        <link rel="canonical" href={currentUrl} />
 
-      {/* ================= IMAGES ================= */}
-      {images.length > 0 && (
-        <div className="mt-16">
-          <Slider {...sliderSettings}>
-            {images.map((img, i) => (
-              <img
-                key={i}
-                src={`${img}`}
-                className="w-full h-[80vh] object-cover"
-                alt={property.propertyName}
-              />
-            ))}
-          </Slider>
-        </div>
-      )}
+        {/* Open Graph Tags (Social Shares) */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={primaryImage} />
+        <meta property="og:url" content={currentUrl} />
 
-      {/* ================= DETAILS ================= */}
-      <div className="max-w-6xl mx-auto px-6 py-12 space-y-10">
-        {/* Title */}
-        <div className="flex flex-wrap justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-semibold">{property.propertyName}</h1>
-            <p className="flex items-center gap-1 text-gray-500 mt-2">
-              <MapPin size={16} />
-              {property.subArea}
-            </p>
-          </div>
+        {/* Twitter Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={primaryImage} />
 
-          <div className="text-2xl font-bold text-[var(--primary-color)]">
-            {property.price && property.price !== "NaN" && property.price !== "0" && property.price !== "null" ? (
-              String(property.price).toLowerCase().includes("aed") || String(property.price).toLowerCase().includes("price")
-                ? property.price
-                : `AED ${property.price}`
-            ) : (
-              "Price on Application"
-            )}
-          </div>
-        </div>
+        {/* Real Estate Schema injection */}
+        <script type="application/ld+json">
+          {JSON.stringify(realEstateSchema)}
+        </script>
 
-        {/* Specs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
-            <div className="flex gap-2">
-              <BedDouble /> {property.bedroom} Beds
-            </div>
-          )}
-          {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
-            <div className="flex gap-2">
-              <Bath /> {property.bathroom} Baths
-            </div>
-          )}
-          {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
-            <div className="flex gap-2">
-              <Ruler /> {property.sizeSqft} sqft
-            </div>
-          )}
-          <div className="flex gap-2">
-            <Building /> {property.propertyType}
-          </div>
-        </div>
-
-        {/* Description */}
-        {property.propertyDetails && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Property Description</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {property.propertyDetails}
-            </p>
-          </div>
+        {/* Dynamic FAQ Schema injection */}
+        {faqSchema && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
         )}
+      </Helmet>
+      <div className="bg-white dark:bg-black text-black dark:text-white">
+        <Navbar />
 
-        {/* Highlights */}
-        {property.highlights?.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Highlights</h2>
-            <ul className="grid md:grid-cols-3 gap-2">
-              {property.highlights.map((h: string, i: number) => (
-                <li key={i}>• {h}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Amenities */}
-        {property.featuresAmenities?.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Amenities</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {property.featuresAmenities.map((a: string, i: number) => (
-                <span key={i} className="border px-3 py-2 rounded text-sm">
-                  {a}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Nearby */}
-        {property.nearby?.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Nearby</h2>
-            <ul className="grid md:grid-cols-3 gap-2">
-              {property.nearby.map((n: string, i: number) => (
-                <li key={i}>• {n}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Extra Highlights */}
-        {property.extraHighlights?.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Extra Highlights</h2>
-            <ul className="grid md:grid-cols-3 gap-2">
-              {property.extraHighlights.map((eh: string, i: number) => (
-                <li key={i}>• {eh}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Extra Info */}
-        {property.extraInfo?.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Extra Information</h2>
-            <div className=" gap-3">
-              {property.extraInfo.map((ei: string, i: number) => (
-                <div
+        {/* ================= IMAGES ================= */}
+        {images.length > 0 && (
+          <div className="mt-16">
+            <Slider {...sliderSettings}>
+              {images.map((img, i) => (
+                <img
                   key={i}
-                  className="px-3 py-2 rounded text-sm"
-                >
-                  {ei}
-                </div>
+                  src={`${img}`}
+                  className="w-full h-[80vh] object-cover"
+                  alt={property.propertyName}
+                />
               ))}
-            </div>
+            </Slider>
           </div>
         )}
 
-        {/* {property.propertyBrochure && (
+        {/* ================= DETAILS ================= */}
+        <div className="max-w-6xl mx-auto px-6 py-12 space-y-10">
+          {/* Title */}
+          <div className="flex flex-wrap justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-semibold">{property.propertyName}</h1>
+              <p className="flex items-center gap-1 text-gray-500 mt-2">
+                <MapPin size={16} />
+                {property.subArea}
+              </p>
+            </div>
+
+            <div className="text-2xl font-bold text-[var(--primary-color)]">
+              {property.price && property.price !== "NaN" && property.price !== "0" && property.price !== "null" ? (
+                String(property.price).toLowerCase().includes("aed") || String(property.price).toLowerCase().includes("price")
+                  ? property.price
+                  : `AED ${property.price}`
+              ) : (
+                "Price on Application"
+              )}
+            </div>
+          </div>
+
+          {/* Specs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
+              <div className="flex gap-2">
+                <BedDouble /> {property.bedroom}
+              </div>
+            )}
+            {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
+              <div className="flex gap-2">
+                <Bath /> {property.bathroom} Baths
+              </div>
+            )}
+            {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
+              <div className="flex gap-2">
+                <Ruler /> {property.sizeSqft} sqft
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Building /> {property.propertyType}
+            </div>
+          </div>
+
+          {/* Description */}
+          {property.propertyDetails && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Property Description</h2>
+              <div
+                ref={contentRef}
+                className={'prose prose-invert prose-headings:text-white text-white  max-w-none w-full prose-img:w-full'}
+                dangerouslySetInnerHTML={{ __html: property.propertyDetails }}
+              />
+            </div>
+          )}
+
+
+          {/* Highlights */}
+          {property.highlights?.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Highlights</h2>
+              <ul className="grid md:grid-cols-3 gap-2">
+                {property.highlights.map((h: string, i: number) => (
+                  <li key={i}>• {h}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Amenities */}
+          {property.featuresAmenities?.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Amenities</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {property.featuresAmenities.map((a: string, i: number) => (
+                  <span key={i} className="border px-3 py-2 rounded text-sm">
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nearby */}
+          {property.nearby?.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Nearby</h2>
+              <ul className="grid md:grid-cols-2 gap-2">
+                {property.nearby.map((n: string, i: number) => (
+                  <li key={i}>• {n}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Extra Highlights */}
+          {property.extraHighlights?.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Extra Highlights</h2>
+              <ul className="grid md:grid-cols-2 gap-2">
+                {property.extraHighlights.map((eh: string, i: number) => (
+                  <li key={i}>• {eh}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Extra Info */}
+          {property.extraInfo?.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Extra Information</h2>
+              <div className=" gap-3">
+                {property.extraInfo.map((ei: string, i: number) => (
+                  <div
+                    key={i}
+                    className="px-3 py-2 rounded text-sm"
+                  >
+                    {ei}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* {property.propertyBrochure && (
           <a
             href={`${API_BASE_URL}${property.propertyBrochure}`}
             target="_blank"
@@ -262,42 +355,50 @@ const BuyDetails = () => {
           </a>
         )} */}
 
-        {/* ================= VIDEO TOUR ================= */}
-        {property.videoLink && (
-          <div>
-            <h2 className="text-xl font-semibold mb-3">Video Tour</h2>
-            <div className="relative w-full aspect-video rounded overflow-hidden border">
-              <iframe
-                src={getYoutubeEmbedUrl(property.videoLink)}
-                className="absolute inset-0 w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+          {/* ================= VIDEO TOUR ================= */}
+          {property.videoLink && (
+            <div>
+              <h2 className="text-xl font-semibold mb-3">Video Tour</h2>
+              <div className="relative w-full aspect-video rounded overflow-hidden border">
+                <iframe
+                  src={getYoutubeEmbedUrl(property.videoLink)}
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ================= MAP ================= */}
-        {property.googleMapUrl && (
-          <div>
-            <h2 className="text-xl font-semibold mb-3">Location</h2>
-            <div className="w-full h-[350px] rounded overflow-hidden border">
-              <iframe
-                src={getEmbedMapUrl(property.googleMapUrl)}
-                className="w-full h-full border-0"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+          {(property.faqs && property.faqs.length>0) && (<div className="max-w-3xl mx-auto">
+            <FAQAccordion
+              items={property.faqs}
+              allowMultiple={false}
+            />
+          </div>)}
+
+          {/* ================= MAP ================= */}
+          {property.googleMapUrl && (
+            <div>
+              <h2 className="text-xl font-semibold mb-3">Location</h2>
+              <div className="w-full h-[350px] rounded overflow-hidden border">
+                <iframe
+                  src={getEmbedMapUrl(property.googleMapUrl)}
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <NotifyMe />
+        <Footer />
       </div>
-
-      <NotifyMe />
-      <Footer />
-    </div>
+    </>
   );
 };
 

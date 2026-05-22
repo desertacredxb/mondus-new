@@ -176,7 +176,7 @@ const AdminLayout = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-64 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6 h-full">
+      <main className="flex-1 lg:ml-64 overflow-y-auto pb-20 lg:pb-6 h-full">
         <Outlet />
       </main>
 
