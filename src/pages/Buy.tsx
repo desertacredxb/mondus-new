@@ -63,7 +63,7 @@ const buyers = [
   {
     icon: User,
     title: "First-Time Home Buyers",
-    desc: "We offer directions and services to enable first-time buyers to get the right home and explore suitable properties for sale in Dubai.",
+    desc: "We offer guidance and services to help first-time buyers find the right home and explore the options available to them.",
   },
   {
     icon: TrendingUp,
@@ -73,7 +73,7 @@ const buyers = [
   {
     icon: Crown,
     title: "Luxury Property Buyers",
-    desc: "Luxury properties for sale in Dubai are unique and luxurious high-end homes that bring unparalleled prestige and luxury.",
+    desc: "Dubai's high-end homes are unique and luxurious, offering unparalleled prestige and sophistication.",
   },
   {
     icon: Globe,
@@ -112,11 +112,11 @@ const propertTypes = [
   },
   {
     title: "Villas for Sale in Dubai",
-    desc: "Dubai villas are setting the benchmark of luxurious living standards with one of the most spacious architectures, personal gardens, and high-quality fittings. The houses have the ability to provide privacy, comfort, and a luxurious lifestyle, making them perfect for the entire family and ideal properties for sale in Dubai.",
+    desc: "Dubai villas are setting the benchmark of luxurious living standards with one of the most spacious architectures, personal gardens, and high-quality fittings. The houses have the ability to provide privacy, comfort, and a luxurious lifestyle, making them perfect for the entire family.",
   },
   {
     title: "Townhouses for Sale in Dubai",
-    desc: "Townhouses would suit families that want a compromise between space and affordability. They are situated in community-oriented developments and provide contemporary design, recreational facilities, and serene living conditions, making them popular properties for sale in Dubai.",
+    desc: "Townhouses would suit families that want a compromise between space and affordability. They are situated in community-oriented developments and provide contemporary design, recreational facilities, and serene living conditions, making them a popular housing choice in the city.",
   },
   {
     title: "Penthouses & Luxury Property in Dubai",
@@ -167,7 +167,7 @@ const benefits = [
 const areas = [
   {
     title: "Downtown Dubai",
-    desc: "Downtown Dubai is a high-class urban way of life with high investments and points of interest due to the presence of iconic buildings and high-end houses, making it a prime location for properties for sale in Dubai.",
+    desc: "Downtown Dubai is a high-class urban way of life with high investments and points of interest due to the presence of iconic buildings and high-end houses, making it a prime location for luxury real estate in the city.",
   },
   {
     title: "Dubai Marina",
@@ -175,7 +175,7 @@ const areas = [
   },
   {
     title: "Palm Jumeirah",
-    desc: "Palm Jumeirah is a symbol of luxury that has villas on the beach and offers ample luxury properties for sale in Dubai.",
+    desc: "Palm Jumeirah is a symbol of luxury, offering beachfront villas and an abundance of high-end homes for those seeking an exclusive island lifestyle.",
   },
   {
     title: "Business Bay",
@@ -214,15 +214,26 @@ const Buy: React.FC = () => {
           `${API_BASE_URL}/api/property?listingType=buy&status=true`,
         );
         const json = await res.json();
-        console.log(json)
+        console.log(json);
         // Safety filter (in case backend changes)
-        const raw = (json.data || []).filter((p: any) => p.listingType === "buy");
+        const raw = (json.data || []).filter(
+          (p: any) => p.listingType === "buy",
+        );
 
         const buyProperties = raw.map((p: any) => ({
           ...p,
-          bedroom: p.bedroom === undefined || p.bedroom === null ? "" : String(p.bedroom),
-          bathroom: p.bathroom === undefined || p.bathroom === null ? "" : String(p.bathroom),
-          sizeSqft: p.sizeSqft === undefined || p.sizeSqft === null ? "" : String(p.sizeSqft),
+          bedroom:
+            p.bedroom === undefined || p.bedroom === null
+              ? ""
+              : String(p.bedroom),
+          bathroom:
+            p.bathroom === undefined || p.bathroom === null
+              ? ""
+              : String(p.bathroom),
+          sizeSqft:
+            p.sizeSqft === undefined || p.sizeSqft === null
+              ? ""
+              : String(p.sizeSqft),
         }));
 
         setSaleData(buyProperties);
@@ -269,7 +280,9 @@ const Buy: React.FC = () => {
       if (bedroomFilter) {
         if (bedroomFilter === "4") {
           const nums = extractNumbers(bedStr);
-          bedroomMatch = nums.length ? nums[0] >= 4 : bedStr.includes("4") || bedStr.includes("4+");
+          bedroomMatch = nums.length
+            ? nums[0] >= 4
+            : bedStr.includes("4") || bedStr.includes("4+");
         } else {
           bedroomMatch = bedStr.includes(String(bedroomFilter).toLowerCase());
         }
@@ -280,17 +293,28 @@ const Buy: React.FC = () => {
       if (bathroomFilter) {
         if (bathroomFilter === "4") {
           const nums = extractNumbers(bathStr);
-          bathroomMatch = nums.length ? nums[0] >= 4 : bathStr.includes("4") || bathStr.includes("4+");
+          bathroomMatch = nums.length
+            ? nums[0] >= 4
+            : bathStr.includes("4") || bathStr.includes("4+");
         } else {
-          bathroomMatch = bathStr.includes(String(bathroomFilter).toLowerCase());
+          bathroomMatch = bathStr.includes(
+            String(bathroomFilter).toLowerCase(),
+          );
         }
       }
 
       // Subarea & property type: substring, case-insensitive
-      const subareaMatch = !subareaFilter || String(property.subArea || "").toLowerCase().includes(subareaFilter.toLowerCase());
+      const subareaMatch =
+        !subareaFilter ||
+        String(property.subArea || "")
+          .toLowerCase()
+          .includes(subareaFilter.toLowerCase());
 
       const propertyTypeMatch =
-        !propertyTypeFilter || String(property.propertyType || "").toLowerCase().includes(propertyTypeFilter.toLowerCase());
+        !propertyTypeFilter ||
+        String(property.propertyType || "")
+          .toLowerCase()
+          .includes(propertyTypeFilter.toLowerCase());
 
       // Area (sizeSqft) - parse numeric ranges and compare bounds
       const sizeNums = extractNumbers(property.sizeSqft);
@@ -432,16 +456,17 @@ const Buy: React.FC = () => {
               <span className="text-[var(--primary-color)]">Dubai</span>
             </h1>
 
-            <p className="mt-6 text-white/90 text-base md:text-lg leading-relaxed max-w-3xl">
+            <p className="mt-6 text-white/90 text-base md:text-lg leading-relaxed max-w-4xl">
               Dubai has emerged as one of the most desirable markets in the real
               estate sector in the world, with excellent opportunities for
               buyers and investors. Combining good financial returns with a
               luxurious lifestyle, Properties for Sale in Dubai are proven to be
               profitable due to their high rental yields and tax-free lifestyle.
-              Featuring diversity, variety, and long-term value, Dubai really
-              stands out by giving apartments in one of the modern high-rise
-              buildings, a beachfront villa, or a luxury penthouse, making it a
-              top destination for properties for sale in Dubai.
+              With remarkable diversity, variety, and long-term value, Dubai
+              truly stands out whether you're looking at a sleek apartment in a
+              modern high-rise, a beachfront villa, or an exclusive penthouse.
+              This range of options is exactly what makes the emirate such a top
+              choice for real estate buyers worldwide.
             </p>
           </div>
         </section>
@@ -551,24 +576,33 @@ const Buy: React.FC = () => {
                       </p>
 
                       <div className="flex gap-4 text-sm py-1">
-                        {property.bedroom && property.bedroom !== "NaN" && property.bedroom !== "0" && property.bedroom !== "null" && (
-                          <span className="flex gap-1">
-                            <BedDouble className="w-4 h-4" />
-                            {property.bedroom}
-                          </span>
-                        )}
-                        {property.bathroom && property.bathroom !== "NaN" && property.bathroom !== "0" && property.bathroom !== "null" && (
-                          <span className="flex gap-1">
-                            <Bath className="w-4 h-4" />
-                            {property.bathroom}
-                          </span>
-                        )}
-                        {property.sizeSqft && property.sizeSqft !== "NaN" && property.sizeSqft !== "0" && property.sizeSqft !== "null" && (
-                          <span className="flex gap-1">
-                            <Ruler className="w-4 h-4" />
-                            {property.sizeSqft}
-                          </span>
-                        )}
+                        {property.bedroom &&
+                          property.bedroom !== "NaN" &&
+                          property.bedroom !== "0" &&
+                          property.bedroom !== "null" && (
+                            <span className="flex gap-1">
+                              <BedDouble className="w-4 h-4" />
+                              {property.bedroom}
+                            </span>
+                          )}
+                        {property.bathroom &&
+                          property.bathroom !== "NaN" &&
+                          property.bathroom !== "0" &&
+                          property.bathroom !== "null" && (
+                            <span className="flex gap-1">
+                              <Bath className="w-4 h-4" />
+                              {property.bathroom}
+                            </span>
+                          )}
+                        {property.sizeSqft &&
+                          property.sizeSqft !== "NaN" &&
+                          property.sizeSqft !== "0" &&
+                          property.sizeSqft !== "null" && (
+                            <span className="flex gap-1">
+                              <Ruler className="w-4 h-4" />
+                              {property.sizeSqft}
+                            </span>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -598,10 +632,10 @@ const Buy: React.FC = () => {
               lifestyle and budget, especially those looking for properties for
               sale in Dubai, UAE. The market targets both the end-users and
               investors, with low-cost homes on one side and extremely expensive
-              homes on the other. Search through apartments, luxury properties
-              for sale in Dubai, villas, townhouses and off plan projects in
-              some of the elite communities and get your dream apartment, house,
-              and villa with ease when exploring properties for sale in Dubai.
+              homes on the other. Search through apartments, villas, townhouses,
+              and off-plan projects in some of the city's most elite
+              communities, and find your dream home with ease when exploring the
+              Dubai property market.
             </p>
           </div>
         </section>
@@ -748,8 +782,8 @@ const Buy: React.FC = () => {
               </h2>
               <p className="mt-6 text-gray-700 dark:text-gray-200 max-w-3xl mx-auto">
                 The real estate market in Dubai has a very broad range of buyers
-                with varying needs and objectives interested in properties for
-                sale in Dubai.
+                with varying needs and objectives, all drawn to what the city's
+                property landscape has to offer.
               </p>
             </div>
 
@@ -784,8 +818,9 @@ const Buy: React.FC = () => {
 
               <p className="text-gray-700 dark:text-gray-200 mb-6 max-w-3xl">
                 Investment in new projects and off-plan projects in Dubai has
-                great benefits for buyers investing in properties for sale in
-                Dubai.
+                great benefits for buyers entering the market. The successful
+                developers support these ventures and offer a good growth
+                prospect in the long run.
               </p>
 
               <div className="grid md:grid-cols-3 gap-6">
@@ -930,18 +965,20 @@ const Buy: React.FC = () => {
                       </h3>
 
                       <ChevronDown
-                        className={`transition-transform duration-300 ${isOpen ? "rotate-180 text-[var(--primary-color)]" : ""
-                          }`}
+                        className={`transition-transform duration-300 ${
+                          isOpen ? "rotate-180 text-[var(--primary-color)]" : ""
+                        }`}
                         size={20}
                       />
                     </button>
 
                     {/* Answer */}
                     <div
-                      className={`px-5 transition-all duration-300 ${isOpen
+                      className={`px-5 transition-all duration-300 ${
+                        isOpen
                           ? "max-h-40 pb-5 opacity-100"
                           : "max-h-0 opacity-0"
-                        } overflow-hidden`}
+                      } overflow-hidden`}
                     >
                       <p className="text-sm text-gray-600 dark:text-gray-100 leading-relaxed">
                         {faq.answer}
@@ -966,8 +1003,8 @@ const Buy: React.FC = () => {
 
             <p className="mt-6 text-gray-700 dark:text-gray-100 leading-relaxed">
               Dubai is also internationally reputed in terms of luxury real
-              estate. Beachfront villas and sky-high penthouses make luxury
-              properties for sale in Dubai the modern way to live. Live in a
+              estate. Beachfront villas and sky-high penthouses represent the
+              modern way to live in the city, the modern way to live. Live in a
               comfortable and prestigious way, enjoy top-level facilities,
               amazing architecture, and magnificent views.
             </p>
