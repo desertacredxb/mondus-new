@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+declare const process: { env: { [key: string]: string | undefined } };
 
 // Comprehensive list of SEO, Social, and AI Web Crawlers
 const BOT_USER_AGENTS: readonly string[] = [
@@ -97,45 +96,50 @@ const IGNORED_EXTENSIONS: readonly string[] = [
   '.webp'
 ] as const;
 
-export function middleware(request: NextRequest): NextResponse {
-  const url: URL = new URL(request.url);
-  const userAgent: string = request.headers.get('user-agent')?.toLowerCase() || '';
-  const prerenderToken: string | undefined = process.env.PRERENDER_TOKEN;
+export default async function middleware(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+  
+  // Use process.env for Vercel Edge Environment variables
+  const prerenderToken = process.env.PRERENDER_TOKEN;
 
   // 1. Check if user-agent matches any bot pattern
-  const isBot: boolean = BOT_USER_AGENTS.some((bot: string) => userAgent.includes(bot));
+  const isBot = BOT_USER_AGENTS.some((bot) => userAgent.includes(bot));
 
   // 2. Check if the requested file is a static asset
-  const isIgnoredExtension: boolean = IGNORED_EXTENSIONS.some((ext: string) =>
+  const isIgnoredExtension = IGNORED_EXTENSIONS.some((ext) =>
     url.pathname.toLowerCase().endsWith(ext)
   );
 
   // 3. Skip prerendering if buffer header is present (prevents infinite proxy loops)
-  const isPrerenderBuffer: string | null = request.headers.get('x-prerender');
+  const isPrerenderBuffer = request.headers.get('x-prerender');
 
-  // If request is from a bot, not an asset, and token exists -> Proxy to Prerender.io
+  // If request is from a bot, not an asset, and token exists -> Proxy request to Prerender.io
   if (isBot && !isIgnoredExtension && !isPrerenderBuffer && prerenderToken) {
-    const prerenderUrl: string = `https://service.prerender.io/${request.url}`;
+    const prerenderUrl = `https://service.prerender.io/${request.url}`;
 
-    // Forward original request headers while injecting the Prerender Token
-    const headers: Headers = new Headers(request.headers);
+    const headers = new Headers(request.headers);
     headers.set('X-Prerender-Token', prerenderToken);
 
-    return NextResponse.rewrite(new URL(prerenderUrl), {
-      request: { headers }
-    });
+    try {
+      const prerenderResponse = await fetch(prerenderUrl, {
+        headers,
+        method: request.method,
+      });
+
+      return prerenderResponse;
+    } catch (error) {
+      console.error('Prerender error, falling back to standard response:', error);
+    }
   }
 
-  // Real human users continue to the regular Vite React app
-  return NextResponse.next();
+  // Continue standard request execution for real users
+  return fetch(request);
 }
 
-// Config to specify which routes run through Middleware
+// Routes to run through Edge Middleware
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except static files & internal Vercel routes
-     */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
